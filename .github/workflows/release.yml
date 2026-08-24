@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install npm with trusted publishing support
+        run: npm install --global npm@12.0.2
+      - name: Use the public npm registry
+        run: npm config set registry https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit:public
+      - run: pnpm validate:skill
+      - run: pnpm test
+      - run: pnpm typecheck
+      - run: pnpm check
+      - run: pnpm verify:package
+      - name: Match the GitHub release tag to the package version
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
+            echo "Release tag $GITHUB_REF_NAME does not match $expected" >&2
+            exit 1
+          fi
+      - id: package
+        name: Check whether this version already exists
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.package.outputs.published != 'true'
+        run: npm publish --access public
+      - if: steps.package.outputs.published == 'true'
+        run: echo "Package version is already published; release verified."

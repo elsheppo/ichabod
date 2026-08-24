@@ -1,0 +1,70 @@
+{
+	"name": "ichabod-harness",
+	"version": "0.1.0",
+	"description": "A structured-output harness for Claude, Codex, and Antigravity CLIs",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/elsheppo/ichabod.git"
+	},
+	"homepage": "https://github.com/elsheppo/ichabod#readme",
+	"bugs": {
+		"url": "https://github.com/elsheppo/ichabod/issues"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"keywords": [
+		"agents",
+		"ai",
+		"cli",
+		"claude",
+		"codex",
+		"antigravity",
+		"structured-output",
+		"synthetic-data",
+		"evaluation"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"bin": {
+		"ichabod": "./bin/ichabod.js"
+	},
+	"files": ["dist", "bin", "skills", "README.md", "LICENSE"],
+	"scripts": {
+		"build": "tsup",
+		"ichabod": "node bin/ichabod.js",
+		"dev": "tsup --watch",
+		"test": "vitest run",
+		"test:integration": "vitest run --config vitest.integration.config.ts",
+		"test:watch": "vitest",
+		"check": "biome check .",
+		"format": "biome format --write .",
+		"lint": "biome lint .",
+		"typecheck": "tsc --noEmit",
+		"prepack": "pnpm build",
+		"prepublishOnly": "pnpm audit:public && pnpm validate:skill && pnpm test && pnpm typecheck && pnpm check",
+		"verify:package": "node scripts/verify-package.mjs",
+		"validate:skill": "node scripts/validate-skill.mjs",
+		"audit:public": "node scripts/audit-public.mjs"
+	},
+	"packageManager": "pnpm@10.11.0",
+	"engines": {
+		"node": ">=20"
+	},
+	"dependencies": {
+		"commander": "^13.1.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/node": "^25.3.3",
+		"tsup": "^8.3.6",
+		"typescript": "^5.7.3",
+		"vitest": "^3.0.5"
+	}
+}
