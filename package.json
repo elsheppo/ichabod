@@ -58,7 +58,7 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"commander": "^13.1.0"
+		"commander": "^15.0.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
